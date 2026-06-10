@@ -41,23 +41,29 @@ export function Navbar() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:py-4">
+        {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-xl font-bold text-emerald-700"
+          className="flex items-center gap-3 text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
         >
-          <span className="text-2xl">🐾</span>
-          ВетКлініка
+          <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+            🐾
+          </span>
+          <span className="hidden sm:inline">ВетКлініка</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-emerald-600 ${
-                pathname === link.href ? "text-emerald-600" : "text-gray-600"
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                pathname === link.href
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
               }`}
             >
               {link.label}
@@ -65,22 +71,20 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        {/* Desktop Auth & Actions */}
+        <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
               {user.role === "ADMIN" && (
                 <Link href="/admin">
                   <Button variant="secondary" size="sm">
-                    Адмін-панель
+                    Панель адміна
                   </Button>
                 </Link>
               )}
-              <Link
-                href="/profile"
-                className="text-sm text-gray-600 hover:text-emerald-600"
-              >
+              <button className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
                 {user.name}
-              </Link>
+              </button>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 Вийти
               </Button>
@@ -88,7 +92,7 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="outline" size="sm">
                   Увійти
                 </Button>
               </Link>
@@ -99,52 +103,99 @@ export function Navbar() {
           )}
         </div>
 
+        {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-gray-600"
+          className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Меню"
         >
-          {menuOpen ? "✕" : "☰"}
+          {menuOpen ? (
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          ) : (
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          )}
         </button>
       </div>
 
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="border-t border-gray-200 bg-white px-4 py-4 md:hidden">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block py-2 text-sm font-medium text-gray-600"
-              onClick={() => setMenuOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="mt-3 flex flex-col gap-2 border-t border-gray-100 pt-3">
+          <nav className="flex flex-col gap-2 mb-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname === link.href
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                }`}
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="border-t border-gray-200 pt-4 flex flex-col gap-2">
             {user ? (
               <>
-                <Link href="/profile" className="text-sm text-gray-600">
-                  Профіль
+                <Link
+                  href="/profile"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  Профіль: {user.name}
                 </Link>
                 {user.role === "ADMIN" && (
-                  <Link href="/admin" className="text-sm text-gray-600">
-                    Адмін-панель
+                  <Link
+                    href="/admin"
+                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    Панель адміна
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="text-left text-sm text-gray-600"
+                  className="px-3 py-2 text-left text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
                 >
                   Вийти
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm text-gray-600">
-                  Увійти
+                <Link href="/login">
+                  <Button variant="outline" size="md" className="w-full">
+                    Увійти
+                  </Button>
                 </Link>
-                <Link href="/register" className="text-sm text-emerald-600">
-                  Реєстрація
+                <Link href="/register">
+                  <Button size="md" className="w-full">
+                    Реєстрація
+                  </Button>
                 </Link>
               </>
             )}
