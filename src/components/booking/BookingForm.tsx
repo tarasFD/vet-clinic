@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { Alert } from "@/components/ui/Alert";
 import { PET_SPECIES_LABELS } from "@/lib/constants";
 
 interface Service {
@@ -35,6 +36,7 @@ export function BookingForm() {
   const [slots, setSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [petError, setPetError] = useState("");
   const [success, setSuccess] = useState(false);
   const [showNewPet, setShowNewPet] = useState(false);
 
@@ -83,6 +85,7 @@ export function BookingForm() {
   }, [form.doctorId, form.serviceId, form.date]);
 
   async function handleAddPet() {
+    setPetError("");
     const res = await fetch("/api/pets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -94,6 +97,12 @@ export function BookingForm() {
       setForm((f) => ({ ...f, petId: pet.id }));
       setShowNewPet(false);
       setNewPet({ name: "", species: "DOG", breed: "", age: "" });
+    } else if (res.status === 401) {
+      setPetError("Потрібна авторизація. Будь ласка, увійдіть у свій акаунт.");
+      setTimeout(() => router.push("/login?redirect=/booking"), 2000);
+    } else {
+      const data = await res.json();
+      setPetError(data.error ?? "Помилка при додаванні тварини");
     }
   }
 
@@ -166,9 +175,13 @@ export function BookingForm() {
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-800 font-medium">
-              ⚠️ {error}
-            </div>
+            <Alert
+              variant="error"
+              title="Помилка при записі"
+              onClose={() => setError("")}
+            >
+              {error}
+            </Alert>
           )}
 
           {/* Service Selection */}
@@ -233,6 +246,16 @@ export function BookingForm() {
           {showNewPet && (
             <div className="rounded-lg border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-6 space-y-4">
               <h4 className="font-bold text-blue-900">Нова тварина</h4>
+
+              {petError && (
+                <Alert
+                  variant="error"
+                  title="Помилка"
+                  onClose={() => setPetError("")}
+                >
+                  {petError}
+                </Alert>
+              )}
 
               <Input
                 label="Кличка"
@@ -304,9 +327,9 @@ export function BookingForm() {
               required
             />
           ) : form.date && form.doctorId && form.serviceId ? (
-            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
-              ℹ️ Немає вільних слотів на цю дату. Спробуйте іншу дату.
-            </div>
+            <Alert variant="warning">
+              Немає вільних слотів на цю дату. Спробуйте іншу дату або лікаря.
+            </Alert>
           ) : null}
 
           {/* Notes */}
