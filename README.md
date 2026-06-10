@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ВетКлініка «Друзі» — Вебсистема ветеринарної клініки
 
-## Getting Started
+Дипломний проєкт: вебсистема ветеринарної клініки з модулем онлайн-запису на прийом.
 
-First, run the development server:
+## Функціональність
+
+### Для клієнтів
+- Перегляд інформації про клініку
+- Каталог послуг з цінами та тривалістю
+- Список лікарів із графіком роботи
+- Онлайн-запис на прийом для домашніх тварин
+- Особистий кабінет: управління тваринами та записами
+
+### Для адміністратора
+- Дашборд зі статистикою
+- Керування записами (підтвердження, скасування, завершення)
+- Керування клієнтами
+- Керування послугами (CRUD)
+- Керування лікарями та їхнім графіком (CRUD)
+
+## Технології
+
+- **Next.js 16** (App Router) — full-stack React framework
+- **TypeScript** — типізація
+- **Tailwind CSS** — стилізація
+- **Prisma** — ORM для роботи з базою даних
+- **SQLite** — база даних (для розробки та демонстрації)
+- **JWT** (jose) — автентифікація через httpOnly cookies
+- **bcryptjs** — хешування паролів
+
+## Запуск
 
 ```bash
+# Встановлення залежностей
+npm install
+
+# Налаштування бази даних (міграція + тестові дані)
+npm run db:setup
+
+# Запуск dev-сервера
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Відкрийте [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Тестові акаунти
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Роль    | Email                | Пароль    |
+|---------|----------------------|-----------|
+| Адмін   | admin@vetclinic.ua   | admin123  |
+| Клієнт  | client@example.com   | client123 |
 
-## Learn More
+## Структура проєкту
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/                # REST API endpoints
+│   ├── admin/              # Адмін-панель
+│   ├── about/              # Про клініку
+│   ├── booking/            # Онлайн-запис
+│   ├── doctors/            # Лікарі
+│   ├── services/           # Послуги
+│   ├── login/              # Авторизація
+│   ├── register/           # Реєстрація
+│   └── profile/            # Профіль клієнта
+├── components/
+│   ├── admin/              # Компоненти адмін-панелі
+│   ├── booking/            # Форма запису
+│   ├── layout/             # Navbar, Footer
+│   └── ui/                 # UI-компоненти
+├── lib/                    # Утиліти (auth, prisma, slots)
+└── generated/prisma/       # Згенерований Prisma Client
+prisma/
+├── schema.prisma           # Схема бази даних
+└── seed.ts                 # Тестові дані
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Endpoints
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Метод  | Endpoint                  | Опис                    |
+|--------|---------------------------|-------------------------|
+| POST   | /api/auth/register        | Реєстрація              |
+| POST   | /api/auth/login           | Вхід                    |
+| POST   | /api/auth/logout          | Вихід                   |
+| GET    | /api/auth/me              | Поточний користувач     |
+| GET    | /api/services             | Список послуг           |
+| GET    | /api/doctors              | Список лікарів          |
+| GET    | /api/slots                | Вільні слоти для запису |
+| GET/POST | /api/appointments       | Записи на прийом        |
+| GET/POST | /api/pets               | Домашні тварини         |
+| GET    | /api/clients              | Клієнти (admin)         |
+| GET    | /api/clinic               | Інформація про клініку  |

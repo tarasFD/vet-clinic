@@ -1,65 +1,127 @@
-import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
-export default function Home() {
+export default async function HomePage() {
+  const [clinic, services, doctors] = await Promise.all([
+    prisma.clinicInfo.findUnique({ where: { id: "default" } }),
+    prisma.service.findMany({ where: { isActive: true }, take: 4 }),
+    prisma.doctor.findMany({ take: 3 }),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div>
+      <section className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white">
+        <div className="mx-auto max-w-6xl px-4 py-20">
+          <h1 className="text-4xl font-bold md:text-5xl">
+            {clinic?.name ?? "ВетКлініка «Друзі»"}
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-4 max-w-2xl text-lg text-emerald-100">
+            {clinic?.description ??
+              "Професійна ветеринарна допомога для ваших улюбленців"}
           </p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link href="/booking">
+              <Button
+                size="lg"
+                className="bg-white text-emerald-700 hover:bg-emerald-50"
+              >
+                Записатися на прийом
+              </Button>
+            </Link>
+            <Link href="/services">
+              <Button
+                size="lg"
+                variant="ghost"
+                className="text-white hover:bg-emerald-700"
+              >
+                Наші послуги
+              </Button>
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <h2 className="mb-8 text-2xl font-bold text-gray-900">Наші послуги</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {services.map((service) => (
+            <Card key={service.id}>
+              <h3 className="font-semibold text-gray-900">{service.name}</h3>
+              <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                {service.description}
+              </p>
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <span className="font-medium text-emerald-600">
+                  {service.price} грн
+                </span>
+                <span className="text-gray-500">{service.duration} хв</span>
+              </div>
+            </Card>
+          ))}
         </div>
-      </main>
+        <div className="mt-6 text-center">
+          <Link href="/services" className="text-emerald-600 hover:underline">
+            Усі послуги →
+          </Link>
+        </div>
+      </section>
+
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-8 text-2xl font-bold text-gray-900">Наші лікарі</h2>
+          <div className="grid gap-6 md:grid-cols-3">
+            {doctors.map((doctor) => (
+              <Card key={doctor.id}>
+                <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-2xl">
+                  👨‍⚕️
+                </div>
+                <h3 className="font-semibold text-gray-900">{doctor.name}</h3>
+                <p className="text-sm text-emerald-600">
+                  {doctor.specialization}
+                </p>
+                <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+                  {doctor.bio}
+                </p>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Link href="/doctors" className="text-emerald-600 hover:underline">
+              Усі лікарі →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <div className="grid gap-8 md:grid-cols-3">
+          {[
+            {
+              icon: "📅",
+              title: "Онлайн-запис",
+              desc: "Запишіться на прийом у зручний для вас час",
+            },
+            {
+              icon: "🏥",
+              title: "Сучасне обладнання",
+              desc: "Діагностика та лікування на найвищому рівні",
+            },
+            {
+              icon: "❤️",
+              title: "Турбота",
+              desc: "Індивідуальний підхід до кожної тварини",
+            },
+          ].map((item) => (
+            <div key={item.title} className="text-center">
+              <div className="text-4xl mb-3">{item.icon}</div>
+              <h3 className="font-semibold text-gray-900">{item.title}</h3>
+              <p className="mt-2 text-sm text-gray-600">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+  VET
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum PetSpecies {
+  DOG
+  CAT
+  BIRD
+  RABBIT
+  OTHER
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String
+  phone        String?
+  role         Role          @default(CLIENT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  pets         Pet[]
+  doctor       Doctor?
+  appointments Appointment[] @relation("ClientAppointments")
+}
+
+model Doctor {
+  id             String           @id @default(cuid())
+  userId         String?          @unique
+  user           User?            @relation(fields: [userId], references: [id])
+  name           String
+  specialization String
+  bio            String?
+  photoUrl       String?
+  schedules      DoctorSchedule[]
+  appointments   Appointment[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model DoctorSchedule {
+  id        String @id @default(cuid())
+  doctorId  String
+  doctor    Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  startTime String
+  endTime   String
+}
+
+model Service {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  duration     Int
+  price        Float
+  isActive     Boolean       @default(true)
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Pet {
+  id           String        @id @default(cuid())
+  name         String
+  species      PetSpecies
+  breed        String?
+  age          Int?
+  ownerId      String
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  dateTime  DateTime
+  status    AppointmentStatus @default(PENDING)
+  notes     String?
+  clientId  String
+  client    User              @relation("ClientAppointments", fields: [clientId], references: [id])
+  doctorId  String
+  doctor    Doctor            @relation(fields: [doctorId], references: [id])
+  serviceId String
+  service   Service           @relation(fields: [serviceId], references: [id])
+  petId     String
+  pet       Pet               @relation(fields: [petId], references: [id])
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model ClinicInfo {
+  id           String @id @default("default")
+  name         String
+  description  String?
+  address      String
+  phone        String
+  email        String
+  workingHours String?
+}
